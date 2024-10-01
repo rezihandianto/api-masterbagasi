@@ -18,9 +18,9 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            $products = ProductResource::collection(Product::get());
+            $products = Product::get();
 
-            return $products;
+            return ProductResource::collection($products);
         } catch (\Exception $ex) {
             return response()->json([
                 'message' => 'Something went wrong',

@@ -32,4 +32,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     //Vouchers
     Route::apiResources(['vouchers' => VoucherController::class]);
+    Route::post('/vouchers/claim', [VoucherController::class, 'claim']);
 });

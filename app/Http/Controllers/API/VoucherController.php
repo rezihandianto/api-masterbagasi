@@ -7,6 +7,7 @@ use App\Http\Requests\Voucher\StoreVoucherRequest;
 use App\Http\Requests\Voucher\UpdateVoucherRequest;
 use App\Http\Resources\VoucherResource;
 use App\Models\Voucher;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -89,6 +90,23 @@ class VoucherController extends Controller
                 return response()->notFound('Voucher not found');
             $voucher->delete();
             return response()->success('Voucher deleted successfully');
+        } catch (\Exception $ex) {
+            return response()->internalServerError('Something went wrong', $ex->getMessage());
+        }
+    }
+    public function claim(Request $request)
+    {
+        $now = Carbon::now(new \DateTimeZone('Asia/Jakarta'));
+        try {
+            $voucher = Voucher::where('code', $request->code)->first();
+            if (!$voucher)
+                return response()->notFound('Voucher not found');
+            if ($now->greaterThan($voucher->expiration_time))
+                return response()->badRequest('Voucher expired');
+            if ($now->lessThan($voucher->activation_time))
+                return response()->badRequest('Voucher not yet active');
+            if ($voucher->is_active)
+                return response()->success('Voucher used successfully', new VoucherResource($voucher));
         } catch (\Exception $ex) {
             return response()->internalServerError('Something went wrong', $ex->getMessage());
         }
